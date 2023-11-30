@@ -1,6 +1,76 @@
+# Zadanie 1.1
+
+testJB <- function(data, alpha = 0.05) {
+  stopifnot(is.vector(data))
+  stopifnot(is.numeric(alpha) && alpha > 0 && alpha <= 1)
+  if(length(data) < 1000) warning("JB test for small samples is prone to false positives")
+  
+  n <- length(data)
+  centered <- data - mean(data)
+  
+  skewnessNumerator <- 1/n * sum(centered^3)
+  skewnessDenominator <- (1/n * sum(centered^2))^(3/2)
+  skewness <- skewnessNumerator / skewnessDenominator
+  
+  kurtosisNumerator <- 1/n * sum(centered^4)
+  kurtosisDenominator <- (1/n * sum(centered^2))^2
+  kurtosis <- kurtosisNumerator / kurtosisDenominator
+  
+  testValue <- n/6 * (skewness^2 + 1/4 * (kurtosis - 3)^2)
+  
+  pValue <- 1 - pchisq(testValue, df = 2)
+  
+  c(`Test Statistic` = testValue, `p-value` = pValue, reject = pValue < alpha)
+}
+
+z1DataDirectory <- "./PNA_Z04/"
+z1DataNames <- c("vec1", "vec2", "vec3", "vec4")
+z1Data <- lapply(z1DataNames, \(name) read.csv(paste0(z1DataDirectory, name, ".csv")))
+names(z1Data) <- z1DataNames
+z1Results <- lapply(z1Data, \(df) testJB(df$x))
+
+# > z1Results
+# $vec1
+# Test Statistic        p-value         reject 
+# 0.4686917      0.7910882      0.0000000 
+# 
+# $vec2
+# Test Statistic        p-value         reject 
+# 3.956425e+01   2.562909e-09   1.000000e+00 
+# 
+# $vec3
+# Test Statistic        p-value         reject 
+# 0.2759953      0.8711007      0.0000000 
+# 
+# $vec4
+# Test Statistic        p-value         reject 
+# 3427.966          0.000          1.000 
+
+# Odrzucamy założenie o normalności rozkładu w przypadku danych vec2 i vec4, brak podstaw do odrzucenia w przypadku vec1 i vec3
+
+# Zadanie 1.2
+TO_COLUMN <- 2
+rejectPercentage <- \(generator) replicate(10^4, generator()) |> apply(TO_COLUMN, \(x) testJB(x)["reject"]) |> mean()
+
+# 0.228 
+studentGenerator <- \() rt(n=100, df=12)
+rejectPercentage(studentGenerator)
+
+# Zadanie 1.3
+
+# 0.0308
+normalGenerator <- \() rnorm(n=30, mean=4, sd=2)
+rejectPercentage(normalGenerator)
+
 # Zadanie 2.4
 
 daneZ24 <- data.frame(x=c(1,2,3), y=c(1,2,1))
+
+basicOLS <- function(x, y){
+  xi <- cbind(intercept = 1, x) |> as.matrix()
+  A <- solve(t(xi) %*% xi)
+  
+}
 xi <- c(rep(1, length(daneZ24$x)), daneZ24$x) |>
   matrix(ncol = 2)
 yi <- daneZ24$y
@@ -22,7 +92,7 @@ betaslm <- modelZ25$coefficients
 xii <- cbind(intercept = 1, daneZ25[2:4]) |> as.matrix()
 yii <- daneZ25$miles
 A <- solve(t(xii) %*% xii)
-betas <- A %*% t(xii) %*% daneZ25$miles
+betas <- A %*% t(xii) %*% yii 
 
 yhat <- xii %*% betas
 residuals <- yii - yhat
