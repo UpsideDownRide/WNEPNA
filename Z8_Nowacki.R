@@ -32,8 +32,24 @@ dataZ5 <- read.csv('PNA_Z08/king.txt')
 dataZ7 <- read.csv('PNA_Z08/lhur2.csv', header = TRUE, sep = ";")$Lhur
 nZ7 <- length(dataZ7)
 tableZ7 <- table(dataZ7)
-catZ7 <- tableZ7 |> as.numeric()
-licz <- tableZ7 |> as.vector()
+catZ7 <- tableZ7 |> names() |> as.numeric()
+empiricalZ7 <- tableZ7 |> as.vector()
 
 pmm <- mean(dataZ7) / var(dataZ7)
 rmm <- mean(dataZ7) / (1 - pmm) * pmm
+
+kZ7 <- length(catZ7)
+
+theoreticalZ7 <- dnbinom(catZ7, rmm, pmm) * nZ7
+
+testStatisticZ7 <- sum((empiricalZ7 - theoreticalZ7)^2 / theoreticalZ7)
+pvalueZ7 <- 1 - pchisq(testStatisticZ7, df = kZ7 - 1) # 0.2392913
+
+# Zadanie 9
+
+dataZ9 <- read.csv('PNA_Z08/exp.csv', sep=';', dec=',')$x
+
+meanZ9 <- mean(dataZ9)
+
+lambdaZ9 <- 1 / meanZ9
+

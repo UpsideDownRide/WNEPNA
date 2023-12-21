@@ -1,0 +1,7 @@
+# home project
+Basic statistics and comparisons
+find distributions to fit the data (discrete for dicrete data)
+ecdf, check if theoretical distrbution matches the empirical one same for parameters
+make sure it's somewhat legible and pretty
+simple sentences
+average of 3 - 4 pages
