@@ -62,6 +62,11 @@ rejectPercentage(studentGenerator)
 normalGenerator <- \() rnorm(n=30, mean=4, sd=2)
 rejectPercentage(normalGenerator)
 
+# Zadanie 2.2
+dataZ2 <- data.frame(price = c(1, 2, 3), lpg = c(0, 1, 0))
+modelZ2 <- lm(price ~ lpg)
+summary(modelZ2)
+
 # Zadanie 2.4
 
 daneZ24 <- data.frame(x=c(1,2,3), y=c(1,2,1))
@@ -113,3 +118,4 @@ covarb2b2 <- covar[3, 3]
 
 daneZ26 <- read.csv('./PNA_Z04/vacation.csv')
 modelZ26 <- lm(miles - 10*age ~ income + kids, data = daneZ26)
+summary(modelZ26)
