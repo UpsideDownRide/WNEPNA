@@ -1,18 +1,18 @@
-# Zadanie 1
+### Zadanie 1
 funToPlotZ1 <- \(x, y) sin(x^2 / 2 - y^2 / 4) * cos(2*x - exp(y))
 valuesZ1 <- seq(from = -5, to = 5, by = 0.05)
 toPlotZ1 <- outer(valuesZ1, valuesZ1, funToPlotZ1)
 
 plot3D::persp3D(valuesZ1, valuesZ1, toPlotZ1)
 
-# Zadanie 2
+### Zadanie 2
 
 rosenbrockZ2 <- \(x, y) (1-x)^2 + 100 * (y - x^2)^2
 valuesZ2 <- seq(from = -5, to = 5, by = 0.05)
 toPlotZ2 <- outer(valuesZ2, valuesZ2, rosenbrockZ2)
 plot3D::persp3D(valuesZ2, valuesZ2, toPlotZ2)
 
-# Zadanie 3
+### Zadanie 3
 
 funToPlotZ3 <- \(x, y) sin(5 * x) * cos(5 * y) * 0.2
 
@@ -20,7 +20,7 @@ valuesZ3 <- seq(from = -2, to = 2, by = 0.05)
 toPlotZ3 <- outer(valuesZ3, valuesZ3, funToPlotZ3)
 plot3D::persp3D(valuesZ3, valuesZ3, toPlotZ3)
 
-# Zadanie 4
+### Zadanie 4
 
 funToPlotZ4 <- \(x, y) sin(10 * (x^2 + y^2)) * 0.1
 
@@ -28,7 +28,7 @@ valuesZ4 <- seq(from = -1, to = 1, by = 0.05)
 toPlotZ4 <- outer(valuesZ4, valuesZ4, funToPlotZ4)
 plot3D::persp3D(valuesZ4, valuesZ4, toPlotZ4)
 
-# Zadanie 5
+### Zadanie 5
 daneZ5 <- c(4.76,0.35,0.04,-1.26,3.30,3.79,0.82,-1.18,-0.77,2.47,1.50,2.62,1.62,3.27,1.89,1.45, 1.61,2.78,-0.98,2.41)
 
 logLikNormal <- function(data) { function(param){
@@ -85,7 +85,7 @@ toPlotZ5 <- outer(xsZ5, ysZ5, Vectorize(biparamLLN))
 plot3D::persp3D(xsZ5, ysZ5, toPlotZ5)
 
 
-# Zadanie 6
+### Zadanie 6
 # epsilon = miles - \beta_0 - \beta_1 * income
 # epislon should have normal distribution with mu = 0, and sd^2
 
@@ -145,7 +145,7 @@ estimatesZ6 <- maxLik::maxLik(logLikZ6(daneZ6), gradLogLikZ6(daneZ6), hessLogLik
 #       48.94        15.73   0.52154
 lm(miles ~ income, daneZ6)
 
-# Zadanie 7
+### Zadanie 7
 
 dataZ7 <- resampledata::Turbine$AveSpeed
 
@@ -201,7 +201,7 @@ toPlotZ7 <- outer(xsZ7, ysZ7, Vectorize(biparamLLW))
 
 plot3D::persp3D(xsZ7, ysZ7, toPlotZ7)
 
-# Zadanie 8
+### Zadanie 8
 
 logLikZ8 <- function(param){
   

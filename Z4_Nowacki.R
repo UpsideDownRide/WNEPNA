@@ -1,4 +1,4 @@
-# Zadanie 1.1
+### Zadanie 1.1
 
 testJB <- function(data, alpha = 0.05) {
   stopifnot(is.vector(data))
@@ -48,7 +48,7 @@ z1Results <- lapply(z1Data, \(df) testJB(df$x))
 
 # Odrzucamy założenie o normalności rozkładu w przypadku danych vec2 i vec4, brak podstaw do odrzucenia w przypadku vec1 i vec3
 
-# Zadanie 1.2
+### Zadanie 1.2
 TO_COLUMN <- 2
 rejectPercentage <- \(generator) replicate(10^4, generator()) |> apply(TO_COLUMN, \(x) testJB(x)["reject"]) |> mean()
 
@@ -56,18 +56,18 @@ rejectPercentage <- \(generator) replicate(10^4, generator()) |> apply(TO_COLUMN
 studentGenerator <- \() rt(n=100, df=12)
 rejectPercentage(studentGenerator)
 
-# Zadanie 1.3
+### Zadanie 1.3
 
 # 0.0308
 normalGenerator <- \() rnorm(n=30, mean=4, sd=2)
 rejectPercentage(normalGenerator)
 
-# Zadanie 2.2
+### Zadanie 2.2
 dataZ2 <- data.frame(price = c(1, 2, 3), lpg = c(0, 1, 0))
 modelZ2 <- lm(price ~ lpg)
 summary(modelZ2)
 
-# Zadanie 2.4
+### Zadanie 2.4
 
 daneZ24 <- data.frame(x=c(1,2,3), y=c(1,2,1))
 
@@ -88,7 +88,7 @@ resVar <- 1/df * sum(res^2)
 covar <- resVar * A
 covb0b1 <- covar[[1,2]] 
 
-# Zadanie 2.5
+### Zadanie 2.5
 
 daneZ25 <- read.csv('./PNA_Z04/vacation.csv')
 modelZ25 <- lm(miles ~ income + age + kids, data = daneZ25)

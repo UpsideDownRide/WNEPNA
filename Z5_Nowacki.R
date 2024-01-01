@@ -1,4 +1,4 @@
-# Zadanie 1
+### Zadanie 1
 
 dataZ1 <- c(0, 0, 0, 1, 0, 1, 0, 1)
 
@@ -17,7 +17,7 @@ maxLik::maxNR(logLikZ1, grad = \(p) 5/p - 3/(1-p),
 
 optimize(logLikZ1, seq(0, 1, by = 0.01), maximum = TRUE)
 
-# Zadanie 2
+### Zadanie 2
 
 dataZ2 <- c(3, 4, 3, 7)
 # \lambda^k \exp(-lambda) / k!
@@ -45,7 +45,7 @@ plotZ2 <- \(...) plot(..., type = 'l', lwd = 2, xlab = expression(lambda ~ ""),
 seq(1, 8, by = 0.01) |> (\(x) plotZ2(x, sapply(x, likPoiss(dataZ2))))()
 abline(v=estimateZ2, col = "deeppink")
 
-# Zadanie 3
+### Zadanie 3
 dataZ3 <- c(1.46, 0.81, 0.88, 0.53, 0.46)
 
 likExp <- function(data){
@@ -69,7 +69,7 @@ plotZ3 <- \(...) plot(..., type = 'l', lwd = 2, xlab = expression(lambda ~ ""),
 seq(0.5, 2, by = 0.05) |> (\(x) plotZ3(x, sapply(x, likExp(dataZ3))))()
 abline(v = estimateZ3, col = "deeppink")
 
-# Zadanie 4
+### Zadanie 4
 
 ## likelihood - \prod_i=1^n 1/\beta indicator(0:\beta) x_i
 ## beta_hat - max(x_i) - 4
@@ -83,7 +83,7 @@ indices <- which(beta < max(dataZ4))
 L[indices] <- 0
 plot(beta, L, type='l')
 
-# Zadanie 5
+### Zadanie 5
 
 dataZ5 <- c(1, 2, 2, 3, 4)
 
@@ -108,7 +108,7 @@ plotZ5 <- \(...) plot(..., type = 'l', lwd = 2, xlab = expression(lambda ~ ""),
 seq(0.5, 4, by = 0.05) |> (\(x) plotZ5(x, sapply(x, likCauchy(dataZ5))))()
 abline(v = estimateZ5, col = "deeppink")
 
-# Zadanie 6
+### Zadanie 6
 
 dataZ6 <- c(51, 115, 150, 190, 217, 228, 350)
 
@@ -118,7 +118,7 @@ estimateZ6 <- maxLik::maxNR(logLikExp(dataZ6), start = 0.01)$estimate
 # 185.8571
 hoursZ6 <- 1 / estimateZ6
 
-# Zadanie 7
+### Zadanie 7
 
 dataZ7 <- c(3, 4, 3, 2, 7)
 
@@ -135,14 +135,14 @@ logLikGeom <- function(data) {
 # 0.2631579
 estimateZ7 <- maxLik::maxNR(logLikGeom(dataZ7), start = 0.5)$estimate
 
-# Zadanie 8
+### Zadanie 8
 
 dataZ8 <- read.csv('./PNA_Z05/Auld_Enemy.txt', sep = '\t')
 
 # 1.462264
 estimateZ8 <- maxLik::maxNR(logLikPoiss(dataZ8$Goals.England), start = 1)$estimate
 
-# zadanie 9
+### Zadanie 9
 
 dataZ9 <- read.csv('./PNA_Z05/Purse_Snatch.txt', header = FALSE)$V1
 
