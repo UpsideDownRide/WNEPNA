@@ -114,10 +114,12 @@ checkZ7 <- function(params, data){
 # 4.6767 - two step 
 gmm::gmm(checkZ7, dataZ7, 3)
 
+gmm::gmm(checkZ7, dataZ7, 3, type="cue")
+
 
 ### Zadanie 8
 
-daneZ8 <- read.csv('PNA_Z09/GammaBothParm.csv')$x
+dataZ8 <- read.csv('PNA_Z09/GammaBothParm.csv')$x
 
 funZ8 <- function(x) { function(params){
   alpha <- params[1]
@@ -131,7 +133,7 @@ funZ8 <- function(x) { function(params){
   W <- matrix(0, nrow = 3, ncol = 3)
   
   e1 <- x - alpha/beta
-  e2 <- x^2 - alpha*(alpha+1) / beta^2 
+  e2 <- x^2 - (alpha*(alpha+1)) / beta^2 
   e3 <- 1/x - beta / (alpha - 1)
   
   W[1, 1] <- sum(e1^2)
@@ -149,8 +151,13 @@ funZ8 <- function(x) { function(params){
   -(t(M) %*% solve(W) %*% M)
 }}
 
-# Nie zbiega sie do niczego sensownego
-maxLik::maxNR(funZ8(daneZ8), start = c(0.01, 0.01))$estimate
+# a = 3.833089, b = 4.741481
+maxLik::maxNR(funZ8(dataZ8), start = c(2.2, 3.2))$estimate
+
+# a = 3.748197, b = 4.623062
+## Obydwie metody sa bardzo niestabilne w stosunku do wartosci poczatkowych w porownaniu z gmm ktory sie zbiega ladnie 
+## z szerszego zbioru wartosci poczatkowych
+maxLik::maxBFGSR(funZ8(dataZ8), start = c(2.2, 3.2))$estimate
 
 checkZ8 <- function(params, data){
   alpha <- params[1]
@@ -163,8 +170,8 @@ checkZ8 <- function(params, data){
   cbind(m1, m2, m3)
 }
 
-# a ~= 0, b ~= 0
-gmm::gmm(checkZ8, daneZ8, c(0.1, 0.1))
+# a ~= 3.8279, b ~= 4.7364
+gmm::gmm(checkZ8, dataZ8, c(14.1, 14.1), type="cue")
 
 ### Zadanie 9
 
@@ -183,7 +190,7 @@ funZ9 <- function(data) { function(params){
   
   
   M <- rbind(sum(m1) / n - z1,
-             sum(m2) / n - z1,
+             sum(m2) / n - z2,
              sum(m3) / n - z3)
   
   W <- matrix(0, nrow = 3, ncol = 3)
@@ -202,26 +209,29 @@ funZ9 <- function(data) { function(params){
   W[2, 2] <- sum(e2^2)
   W[3, 3] <- sum(e3^2)
   
-  #W <- W / n
+  W <- W / n
   
   -(t(M) %*% solve(W) %*% M)
 }}
 
-maxLik::maxNR(funZ9(dataZ9), start = c(1, 1))$estimate
+# mu = 3.033954, sigma = 1.004762
+# dziala z turbo waskiego zakresu wartosic startowych
+maxLik::maxNR(funZ9(dataZ9), start = c(2.5, 1))$estimate
+
+# mu = 3.033890, sigma = 1.004645
+# jak wyzej - bardzo waski zakres wartosci poczatkowych
+maxLik::maxBFGSR(funZ9(dataZ9), start = c(1.8, 0.8))$estimate
 
 checkZ9 <- function(params, data){
   mu <- params[1]
   sigma <- params[2]
   
-  m1 <- data
-  m2 <- (data - mu)^2
-  m3 <- (data - mu)^4
-  z1 <- mu
-  z2 <- sigma^2
-  z3 <- 3 * sigma^4
+  m1 <- data - mu
+  m2 <- (data - mu)^2 - sigma^2
+  m3 <- (data - mu)^4 - 3 * sigma^4
   
-  cbind(m1 - z1, m2 - z2, m3 - z3)
+  cbind(m1, m2, m3)
 }
 
-# mu = 3.034, sigma = 1.0047
-gmm::gmm(checkZ9, dataZ9, c(1, 1))
+# mu = 3.0339, sigma = 1.0051
+gmm::gmm(checkZ9, dataZ9, c(5, 3), type="cue")
