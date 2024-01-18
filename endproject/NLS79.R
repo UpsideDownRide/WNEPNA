@@ -170,8 +170,20 @@ categories <- qnames(categories)
 
 #************************************************************************************************************
 
+## Powyższy kod został pobrany wraz z danymi ze strony NLS ##
+
 weightData <- categories$`Q11-9_2018` |> na.omit() |> (\(pounds) pounds / 2.205)()
 
+# Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#31.75   72.56   83.90   86.00   97.51  217.23 
+summary(weightData)
+hist(weightData, breaks = 20,
+     xlab = 'Waga (kg)', main = 'Histogram wagi respondentów', ylab = 'Częstość',
+     xlim = c(min(weightData), max(weightData)))
+dev.copy(svg, file = "./endproject/weightHistogram.svg")
+dev.off()
+
+## logLikLogNormal - funkcja zwracająca funkcję logarytmu z funkcji gęstości rozkładu lognormalnego
 logLikLogNormal <- function(data) { function(param){
   n <- length(data)
   mu <- param[1]
@@ -179,31 +191,88 @@ logLikLogNormal <- function(data) { function(param){
   -sum(log(data)) - 0.5 * n * log(2*pi) - n * log(sigma) - 0.5 * sum((log(data) - mu)^2/sigma^2) 
 }}
 
+upperThresholdWeight <- quantile(weightData, 0.99)
+weightDataTrimmed <- weightData |> (\(i) i[i <= upperThresholdWeight])()
 
-resultWeight <- maxLik::maxLik(logLikLogNormal(weightData), start = c(2,2))
+## Przycinanie danych nie poprawiło szczególnie dopasowania rozkładu
+weightDataTrimmed <- weightData
+
+## logmu = 4.427991 logsd = 0.2294353 
+#resultWeight <- maxLik::maxLik(logLikLogNormal(weightDataTrimmed), start = c(2,2))
+resultWeight <- MASS::fitdistr(weightDataTrimmed, "lognormal")
 muWeight <- resultWeight$estimate[1]
 sigmaWeight <- resultWeight$estimate[2]
 
-qqplot(qlnorm(ppoints(length(weightData)), muWeight, sigmaWeight), weightData)
-qqline(weightData, distribution = \(p) qlnorm(p, muWeight, sigmaWeight), col='red', lwd=2)
+## mu = 85.9997774   sigma = 20.0730441
+resultWeightNormal <- MASS::fitdistr(weightDataTrimmed, "normal")
 
-seqWeight <- seq(10, max(weightData), 0.1)
-hist(weightData, breaks = 25, freq = FALSE)
+seqWeight <- seq(10, max(weightData)*1.1, 0.5)
+hist(weightDataTrimmed, breaks = 25, freq = FALSE,
+     xlab = 'Waga (kg)', main = 'Histogram wagi respondentów', ylab = 'Gęstość',
+     xlim = c(min(weightDataTrimmed), max(weightDataTrimmed)*1.1))
 lines(seqWeight, dlnorm(seqWeight, muWeight, sigmaWeight), col = "red", lwd = 2)
+lines(seqWeight, dnorm(seqWeight, resultWeightNormal$estimate[1], resultWeightNormal$estimate[2]), col = "blue", lwd = 2)
+legend("topright", legend = c("Lognormal", "Normal"),
+       col = c("red", "blue"), lwd = 2, cex = 0.8)
+dev.copy(svg, file = "./endproject/weightHistogramDensity.svg")
+dev.off()
 
-incomeDataUnfiltered <- categories$TNFI_TRUNC_2018 |> na.omit() 
-incomeQuants <- quantile(incomeDataUnfiltered, seq(0, 1, length = 100)[1:95])
-incomeData <- incomeDataUnfiltered |> Filter(\(income) income < max(incomeQuants) & income > 0, x = _)
+qqplot(qlnorm(ppoints(length(weightDataTrimmed)), muWeight, sigmaWeight),
+       weightDataTrimmed, xlab = "Wartości teoretyczne", ylab = "Wartości empiryczne")
+qqline(weightDataTrimmed, distribution = \(p) qlnorm(p, muWeight, sigmaWeight), col='red', lwd=2)
+dev.copy(svg, file = "./endproject/weightQQPlot.svg")
+dev.off()
 
-resultIncome <- maxLik::maxLik(logLikLogNormal(incomeData), start = c(2,2))
+# D = 0.031086, p-value = 0.000004204
+ks.test(weightDataTrimmed, "plnorm", meanlog = muWeight, sdlog = sigmaWeight)
+
+## Income
+
+incomeDataUnfiltered <- categories$TNFI_TRUNC_2018 |> na.omit()
+summary(incomeDataUnfiltered)
+
+hist(incomeDataUnfiltered, breaks = 20,
+     xlab = 'Dochód (USD)', main = 'Histogram dochodów respondentów', ylab = 'Częstość',
+     xlim = c(min(incomeDataUnfiltered), max(incomeDataUnfiltered)))
+dev.copy(svg, file = "./endproject/incomeHistogram.svg")
+dev.off()
+
+incomeDataPlusOne <- incomeDataUnfiltered + 1
+
+upperThreshold <- 7*10^5
+incomeData <- incomeDataPlusOne |> (\(i) i[i <= upperThreshold])()
+
+#resultIncome <- maxLik::maxLik(logLikLogNormal(incomeData), start = c(2,2))
+#  meanlog     sdlog 
+#10.511237  2.270154 
+fitIncome <- MASS::fitdistr(incomeData, "lognormal")
 muIncome <- resultIncome$estimate[1]
 sigmaIncome <- resultIncome$estimate[2]
 
-seqIncome <- seq(10, max(incomeData), 0.1)
-hist(incomeData, breaks = 25, freq = FALSE)
-lines(seqIncome, dlnorm(seqIncome, muIncome, sigmaIncome), col = "red", lwd = 2)
+#shape            scale     
+#0.9122015   108384.5572963 
+fitWeibull <- MASS::fitdistr(incomeData, "weibull")
 
-fitQuants <- incomeQuants |> names() |> gsub('%', '', x = _) |> as.numeric() |> (\(p) p / 100)()
-fitIncome <- qlnorm(fitQuants, muIncome, sigmaIncome)
-qqplot(fitIncome, incomeData)
-qqline(incomeData, distribution = \(p) qlnorm(p, muIncome, sigmaIncome), col='red', lwd=2)
+#shape          scale    
+#1.000000   80289.049326 
+fitGamma <- MASS::fitdistr(incomeData, dgamma, start = list(shape = 1, scale = 10000), lower = c(1, 10000))
+
+seqIncome <- seq(10, max(incomeData), 1000)
+hist(incomeData, breaks = 25, freq = FALSE,
+     xlab = 'Dochód (USD)', main = 'Histogram dochodów respondentów', ylab = 'Gęstość',
+     xlim = c(min(incomeData), max(incomeData)*1.1))
+lines(seqIncome, dlnorm(seqIncome, muIncome, sigmaIncome), col = "red", lwd = 2)
+lines(seqIncome, dweibull(seqIncome, fitWeibull$estimate[1], fitWeibull$estimate[2]), col = "blue", lwd = 2)
+lines(seqIncome, dgamma(seqIncome, shape = fitGamma$estimate[1], scale = fitGamma$estimate[2]), col = "green", lwd = 2)
+legend("topright", legend = c("Lognormal", "Weibull", "Gamma"), col = c("red", "blue", "green"), lwd = 2)
+dev.copy(svg, file = "./endproject/incomeHistogramDensity.svg")
+dev.off()
+
+qqplot(qgamma(ppoints(length(incomeData)), shape = fitGamma$estimate[1], scale = fitGamma$estimate[2]),
+       incomeData, xlab = "Wartości teoretyczne", ylab = "Wartości empiryczne")
+qqline(incomeData, distribution = \(p) qgamma(p, shape = fitGamma$estimate[1], scale = fitGamma$estimate[2]), col='red', lwd=2)
+dev.copy(svg, file = "./endproject/incomeQQPlot.svg")
+dev.off()
+
+# D = 0.045729, p-value = 0
+ks.test(incomeData, "pgamma", shape = fitGamma$estimate[1], scale = fitGamma$estimate[2])
